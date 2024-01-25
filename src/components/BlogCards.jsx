@@ -1,17 +1,47 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import BlogCard from "./BlogCard";
 
-function BlogCards({ blogs }) {
+function BlogCards({ blogs, currentBlog, loadingUserBlog }) {
+  const [restBlogs, setRestBlogs] = useState([]);
+
+  useEffect(() => {
+    if (blogs?.length > 0 && currentBlog) {
+      const rest = blogs?.filter((blog) => blog.id !== currentBlog);
+      setRestBlogs(rest);
+    } else {
+      setRestBlogs(blogs);
+    }
+  }, [blogs, currentBlog]);
+
+  if (!restBlogs || !blogs) {
+    return <h1>Loading...</h1>;
+  }
+
   return (
     <div>
-      <h2 className="font-Source text-[20px] font-[700] leading-[1.2] underline underline-[700] underline-offset-[20px] mb-[64px]">
-        Your Blogs
-      </h2>
-      <div className="flex flex-wrap space-x-4 space-y-6 justify-start">
-        {blogs.map((blog, id) => (
-          <BlogCard key={id} blog={blog} />
-        ))}
-      </div>
+      {loadingUserBlog ? (
+        <div className="w-full h-[200px] flex justify-center items-center">
+          <p className="text-black font-Source text-[30px]">
+            Loading User blogs
+          </p>
+        </div>
+      ) : (
+        <>
+          {restBlogs.length <= 0 ? (
+            <div className="w-full h-[200px] flex justify-center items-center">
+              <p className="text-black font-Source text-[30px]">
+                User don't have any blog posts found.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-4">
+              {restBlogs.map((blog, id) => (
+                <BlogCard key={id} blog={blog} />
+              ))}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

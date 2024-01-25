@@ -13,6 +13,12 @@
 
 /public/tinymce/
 
+# Ignore environment variables file
+.env
+
+# Ignore Visual Studio Code settings
+.vscode/
+
 # misc
 .DS_Store
 .env.local

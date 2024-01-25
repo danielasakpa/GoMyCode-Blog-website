@@ -1,19 +1,18 @@
-import './App.css';
-// import './prism.css'
+import './prism.css'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import PrivateRoute from "./Auth/PrivateRoute ";
 import Layout from './pages/Layout';
 import Home from './pages/Home';
 import About from './pages/About';
 import Blog from './pages/Blog';
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faPlus } from '@fortawesome/free-solid-svg-icons'
-import { faFacebook, faTwitter } from '@fortawesome/free-brands-svg-icons'
 import CreateBlog from './pages/CreateBlog';
 import SignUp from './pages/SignUp';
 import SignIn from './pages/SignIn';
-import { AuthProvider } from "./context/AuthContext";
-import PrivateRoute from "./Auth/PrivateRoute ";
 import Profile from './pages/Profile';
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faFacebook, faTwitter } from '@fortawesome/free-brands-svg-icons'
 
 library.add(faPlus, faFacebook, faTwitter);
 

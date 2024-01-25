@@ -1,64 +1,78 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import ProfileIMmg from "../assets/img/demo/avatar2.jpg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import ReadNext from "../components/ReadNext";
+import BlogCards from "../components/BlogCards";
 import {
   doc,
   getDoc,
   getDocs,
   where,
+  orderBy,
   collection,
   query,
 } from "firebase/firestore";
-import { db } from "../firebase-config";
+import { auth, db } from "../util/firebase-config";
 import parse from "html-react-parser";
-import { useAuth } from "../context/AuthContext"; // Adjust the path accordingly
+import Loader from "../components/Loader";
 
 export default function Blog() {
   const { id } = useParams();
-  const { user, userLoading } = useAuth();
 
-  const [data, setData] = useState({});
-  const [blogs, setBlogs] = useState({});
+  const [blog, setBlog] = useState({});
+  const [blogs, setBlogs] = useState([]);
+  const [blogUser, setBlogUser] = useState({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const getData = async () => {
       setLoading(true);
+
       const docRef = doc(db, "blogs", id);
       const blogDetail = await getDoc(docRef);
-      setData(blogDetail.data());
+      setBlog(blogDetail.data());
 
-      // Check if user and user.uid exist before making the query
-      if (user && user.uid) {
-        const blogRef = collection(db, "blogs");
-        const Blogs = query(blogRef, where("userId", "==", user.uid));
+      const blogRef = collection(db, "blogs");
+      const q = query(blogRef, orderBy("createdAt", "desc"));
 
-        const querySnapshot = await getDocs(Blogs);
-        setBlogs(
-          querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
-        );
-      }
-
-      setLoading(false);
+      const querySnapshot = await getDocs(q);
+      setBlogs(
+        querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+      );
     };
 
     getData();
-  }, [user, id]);
+  }, [id]);
 
-  if (loading) {
-    return <h1>Loading...</h1>;
+  useEffect(() => {
+    const getUserData = async () => {
+      if (blog && blog.userId) {
+        console.log(" blog.userId", blog.userId);
+        const usersCollectionRef = collection(db, "users");
+        const q = query(usersCollectionRef, where("id", "==", blog.userId));
+        const querySnapshot = await getDocs(q);
+
+        setBlogUser(
+          querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+        );
+      }
+      setLoading(false);
+    };
+
+    return () => getUserData();
+  }, [blog]);
+
+  if (loading || !blog || !blogs || !blogUser) {
+    return <Loader />;
   }
 
-  console.log("data", data);
+  const formattedDate = blog?.createdAt?.toDate().toDateString();
 
-  const renderedDescription = parse(`${data?.description}`);
+  const renderedDescription = parse(`${blog?.description}`);
 
   return (
     <>
-      <section className="flex items-center mt- h-[683px]">
-        <div className="basis-1/2 py-[80px] pr-[80px] pl-[15px]">
+      <section className="flex items-center mt-[20px] py-6 h-[max-content] mb-[25px]">
+        <div className="basis-1/2 py-[20px] pr-[80px] pl-[15px]">
           <a
             href="/blog"
             className="block font-Source text-[16px] text-[#EA2F65] font-[700] mb-[18px] hover:underline hover:underline-offset-1"
@@ -66,42 +80,36 @@ export default function Blog() {
             STORIES
           </a>
           <h1 className="font-Playfair text-[56px] leading-[1.2em] font-bold mb-[16px]">
-            {/* Sterling could jump 8% if Brexit deal gets approved by UK Parliament */}
-            {data?.topic}
+            {blog?.topic}
           </h1>
-          <p className="font-Source text-[16px] mb-[16px]">
-            {/* Analysts told CNBC that the currency could hit anywhere between
-            <br />
-            $1.35-$1.40 if the deal gets passed through the U.K. parliament. */}
-            {data?.subTopic}
-          </p>
+          <p className="font-Source text-[16px] mb-[16px]">{blog?.subTopic}</p>
           <div className="flex items-center space-x-5">
             <img
-              src={ProfileIMmg}
+              src={blogUser[0]?.photoURL || "default-profile-image.jpg"}
               alt=""
               className="h-[70px] w-[70px] rounded-full"
             />
             <div>
               <span className="font-Source text-[14px] block mb-1 font-medium">
-                Jane Seymour
+                {blogUser[0]?.displayName || "Jane Seymour"}
               </span>
               <span className="font-Source text-[14px] block font-medium text-[#9B9B9B]">
-                A few hours ago · 5 min. read
+                {formattedDate} · 5 min. read
               </span>
             </div>
           </div>
         </div>
         <div className="basis-1/2">
           <img
-            src={data?.blogImage}
+            src={blog?.blogImage}
             alt="BlogImg"
-            className="w-[542px] h-[583px]"
+            className="w-[542px] max-h-[583px]"
           />
         </div>
       </section>
       <section className="flex py-[48px] px-[15px]">
         <div className="flex justify-end mr-16 basis-1/4">
-          <div className="sticky top-[70px] z-40 h-[max-content] w-[max-content] flex flex-col items-center justify-start">
+          <div className="sticky top-[80px] z-40 h-[max-content] w-[max-content] flex flex-col items-center justify-start">
             <span className="block font-Source text-[#9B9B9B] text-[16px] mb-[16px]">
               Share this
             </span>
@@ -147,11 +155,11 @@ export default function Blog() {
           </div>
         </div>
       </section>
-      <section className="py-24">
+      <section className="mb-[40px]">
         <h2 className="font-Source text-[20px] font-[700] leading-[1.2] underline underline-[700] underline-offset-[20px] mb-[64px]">
           Read Next
         </h2>
-        <ReadNext blogs={blogs} currentBlog={id} />
+        <BlogCards blogs={blogs} currentBlog={id} />
       </section>
     </>
   );

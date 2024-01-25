@@ -8,13 +8,11 @@ import {
 } from "firebase/storage";
 import {
     getAuth,
-    signInWithEmailAndPassword,
-    createUserWithEmailAndPassword,
 } from "firebase/auth";
 
 
 const firebaseConfig = {
-    apiKey: "AIzaSyD08gy9N7kffrr9z7XsN730Wi-bF-uUjuU",
+    apiKey: process.env.FIREBASE_API_KEY,
     authDomain: "blog-website-7bac4.firebaseapp.com",
     projectId: "blog-website-7bac4",
     storageBucket: "blog-website-7bac4.appspot.com",

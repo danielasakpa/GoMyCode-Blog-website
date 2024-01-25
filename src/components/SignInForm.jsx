@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth } from "../firebase-config";
+import { auth } from "../util/firebase-config";
+import { useAuth } from "../context/AuthContext"; // Adjust the path accordingly
 
-function SignInForm() {
+function SignInForm({ setLoading }) {
   const navigate = useNavigate();
+
+  const { setUser } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -58,8 +61,7 @@ function SignInForm() {
   };
 
   const handleSubmit = async (e) => {
-    // Add your form submission logic here
-    console.log("Form submitted:", formData);
+    setLoading(true);
 
     e.preventDefault();
     try {
@@ -69,14 +71,14 @@ function SignInForm() {
         formData.password
       );
 
-      console.log(userCredential.user);
-
+      setLoading(false);
       if (userCredential.user) {
+        setUser(userCredential.user);
         navigate("/profile");
       }
     } catch (error) {
-      const errorCode = error.code;
-      const errorMessage = error.message;
+      console.error(error.code);
+      console.error(error.message);
     }
   };
 
@@ -131,12 +133,12 @@ function SignInForm() {
           </button>
           <p className="text-sm text-center">
             Don't have an account?{" "}
-            <a
-              href="javascript:void(0)"
+            <Link
+              to="/signup"
               className="text-sm text-blue-600 font-semibold"
             >
               Sign Up
-            </a>
+            </Link>
           </p>
         </form>
         <hr className="my-6" />

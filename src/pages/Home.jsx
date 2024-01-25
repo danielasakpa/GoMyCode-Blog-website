@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
-import AllStories from "../components/AllStories";
-import Popular from "../components/Popular";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
-import { db } from "../firebase-config";
+import { db } from "../util/firebase-config";
+import BlogCards from "../components/BlogCards";
+import Loader from "../components/Loader";
 
 function Home() {
   const [data, setData] = useState({});
@@ -13,10 +13,9 @@ function Home() {
     const getData = async () => {
       setLoading(true);
       const blogRef = collection(db, "blogs");
-      const newestBlosg = query(blogRef, orderBy("createdAt", "desc"));
+      const q = query(blogRef, orderBy("createdAt", "desc"));
 
-      console.log(newestBlosg);
-      const querySnapshot = await getDocs(newestBlosg);
+      const querySnapshot = await getDocs(q);
       setData(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
       setLoading(false);
     };
@@ -24,16 +23,18 @@ function Home() {
   }, []);
 
   if (loading) {
-    return <h1>Loading...</h1>;
+    return <Loader />;
   }
 
   return (
     <>
       <Header blogs={data} />
-      <div className="flex space-x-2">
-        <AllStories />
-        <Popular />
-      </div>
+      <section className="mb-[40px]">
+        <h2 className="font-Source text-[20px] font-[700] leading-[1.2] underline underline-[700] underline-offset-[20px] mb-[64px]">
+          More Blogs
+        </h2>
+        <BlogCards blogs={data} currentBlog={data[0]?.id} />
+      </section>
     </>
   );
 }

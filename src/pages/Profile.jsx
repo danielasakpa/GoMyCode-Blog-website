@@ -4,29 +4,32 @@ import { v4 as uuidv4 } from "uuid";
 import {
   collection,
   query,
-  orderBy,
-  limit,
   where,
   getDocs,
+  updateDoc,
 } from "firebase/firestore";
 import {
   auth,
   db,
+  doc,
   storage,
   getDownloadURL,
   ref,
   uploadBytes,
-} from "../firebase-config";
+} from "../util/firebase-config";
 import { updateProfile } from "firebase/auth";
 import { useAuth } from "../context/AuthContext"; // Adjust the path accordingly
 import BlogCards from "../components/BlogCards";
+import Loader from "../components/Loader";
 
 function Profile() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
 
   const [blogs, setBlogs] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [loadingUserBlog, setLoadingUserBlog] = useState(false);
   const [editedUser, setEditedUser] = useState({
     displayName: user.displayName || "",
     email: user.email || "",
@@ -36,27 +39,23 @@ function Profile() {
   useEffect(() => {
     const getBlogsByUser = async () => {
       if (user) {
+        setLoadingUserBlog(true);
         const blogRef = collection(db, "blogs");
-        console.log(blogRef);
-        const firstFour = query(
-          blogRef,
-          where("userId", "==", user.uid)
-        );
-        const docSnapshot = await getDocs(firstFour);
-        console.log(
-          docSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
-        );
+        const q = query(blogRef, where("userId", "==", user.uid));
+
+        const querySnapshot = await getDocs(q);
         setBlogs(
-          docSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+          querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
         );
-        // setLastVisible(docSnapshot.docs[docSnapshot.docs.length - 1]);
       }
+      setLoadingUserBlog(false);
     };
     getBlogsByUser();
-  }, []);
+  }, [user]);
 
   function onLogout() {
     auth.signOut();
+    localStorage.removeItem("user");
     navigate("/signin");
   }
 
@@ -71,11 +70,11 @@ function Profile() {
 
   const handleSaveClick = async (e) => {
     setIsEditing(false);
+    setLoading(true);
 
     e.preventDefault();
 
     try {
-      // Upload blog image to Firebase Storage
       if (editedUser.photoURL) {
         const imageRef = ref(storage, `profileImage/${uuidv4()}`);
 
@@ -83,12 +82,30 @@ function Profile() {
           .then((snapshot) => {
             getDownloadURL(snapshot.ref)
               .then(async (url) => {
-                await updateProfile(user, {
-                  displayName: editedUser.displayName,
-                  email: editedUser.email,
-                  photoURL:
-                    editedUser.photoURL === user.photoURL ? user.photoURL : url,
-                });
+                const updatedProfile = {
+                  ...(editedUser.displayName !== user.displayName && {
+                    displayName: editedUser.displayName,
+                  }),
+                  ...(editedUser.email !== user.email && {
+                    email: editedUser.email,
+                  }),
+                  ...(editedUser.photoURL !== user.photoURL && {
+                    photoURL: url,
+                  }),
+                };
+
+                await updateProfile(auth.currentUser, updatedProfile);
+
+                const updatedUser = auth.currentUser;
+
+                await updateDoc(
+                  doc(db, "users", updatedUser.uid),
+                  updatedProfile
+                );
+
+                setUser(updatedUser);
+                setLoading(false);
+                console.log("User was updated successfully");
               })
               .catch((error) => {
                 console.log(error.message);
@@ -97,8 +114,6 @@ function Profile() {
           .catch((error) => {
             console.log(error.message);
           });
-
-        console.log("User was updatated sucessfully");
       }
     } catch (error) {
       const errorCode = error.code;
@@ -118,19 +133,23 @@ function Profile() {
     setIsEditing(false);
   };
 
+  if (loading) {
+    return <Loader />;
+  }
+
+  console.log(user);
+
   return (
     <>
       <div className="p-6 mb-[120px] bg-[#E8F3EC]">
         <div className="flex items-center mb-4">
           <div className="relative w-20 h-20 rounded-full bg-gray-200 mr-4">
-            {/* Display user profile image */}
             <img
               src={user.photoURL || "default-profile-image.jpg"}
               alt="Profile"
               className="w-full h-full object-cover rounded-full"
             />
 
-            {/* Edit icon */}
             {isEditing && (
               <label
                 htmlFor="profileImageInput"
@@ -153,7 +172,6 @@ function Profile() {
               </label>
             )}
 
-            {/* Input for changing profile image (hidden by default) */}
             <input
               id="profileImageInput"
               type="file"
@@ -241,7 +259,7 @@ function Profile() {
 
         <div className="mt-8">
           <button
-            onClick={() => auth.signOut()}
+            onClick={onLogout}
             className="px-4 py-2 bg-red-500 text-white rounded-md"
           >
             Logout
@@ -249,7 +267,10 @@ function Profile() {
         </div>
       </div>
       <section className="mb-[40px]">
-        <BlogCards blogs={blogs} />
+        <h2 className="font-Source text-[20px] font-[700] leading-[1.2] underline underline-[700] underline-offset-[20px] mb-[64px]">
+          Your Blogs
+        </h2>
+        <BlogCards blogs={blogs} loadingUserBlog={loadingUserBlog} />
       </section>
     </>
   );

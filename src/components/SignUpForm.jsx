@@ -7,10 +7,14 @@ import {
   storage,
   getDownloadURL,
   ref,
+  db,
+  doc,
   uploadBytes,
-} from "../firebase-config";
+  serverTimestamp,
+} from "../util/firebase-config";
+import { setDoc } from "firebase/firestore";
 
-function SignUpForm() {
+function SignUpForm({ setLoading }) {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -19,14 +23,14 @@ function SignUpForm() {
     confirmPassword: "",
     agreeTerms: false,
     profileImage: null,
-    displayName: "", // Added displayName field
+    displayName: "",
   });
 
   const [errors, setErrors] = useState({
     email: "",
     password: "",
     confirmPassword: "",
-    displayName: "", // Added displayName field
+    displayName: "",
   });
 
   const validateEmail = () => {
@@ -122,8 +126,7 @@ function SignUpForm() {
       return;
     }
 
-    // Add your form submission logic here
-    console.log("Form submitted:", formData);
+    setLoading(true);
 
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -151,6 +154,13 @@ function SignUpForm() {
                 await updateProfile(user, {
                   photoURL: url,
                 });
+                await setDoc(doc(db, "users", userCredential.user.uid), {
+                  displayName: formData.displayName,
+                  email: formData.email,
+                  photoURL: url,
+                  timeStamp: serverTimestamp(),
+                });
+                setLoading(false);
               })
               .catch((error) => {
                 console.log(error.message);
@@ -161,7 +171,7 @@ function SignUpForm() {
           });
       }
 
-      navigate("/");
+      navigate("/signin");
     } catch (error) {
       const errorCode = error.code;
       const errorMessage = error.message;
@@ -171,13 +181,6 @@ function SignUpForm() {
 
   return (
     <div className="w-full h-full max-w-lg basis-2/3 bg-white shadow-lg rounded-lg p-6 relative">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="w-3.5 cursor-pointer shrink-0 fill-[#333] hover:fill-red-500 float-right"
-        viewBox="0 0 320.591 320.591"
-      >
-        {/* ... (SVG path data) */}
-      </svg>
       <div className="my-6 text-center">
         <h4 className="text-3xl text-[#333] font-Playfair font-extrabold">
           Sign Up
@@ -289,13 +292,6 @@ function SignUpForm() {
           type="button"
           className="px-6 py-3 w-full font-semibold bg-gray-200 hover:bg-gray-300 text-[#333] rounded-full"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="22px"
-            fill="#fff"
-            class="inline mr-2"
-            viewBox="0 0 512 512"
-          ></svg>
           Continue with Google
         </button>
       </form>

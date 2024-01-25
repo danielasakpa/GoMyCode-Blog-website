@@ -16,15 +16,15 @@ function BlogCard({ blog }) {
         alt={blog.topic}
         className="w-full h-48 object-cover object-center"
       />
-      <div className="p-6">
-        <div className="flex flex-wrap space-x-2 space-y-2 justify-start items-center mb-4">
-          {blog.tags.map((tag, id) => (
-            <span
+      <div className="py-6 px-2">
+        <div className="flex space-x-2 flex-wrap mb-4">
+          {blog.tags.slice(0, 3).map((tag, id) => (
+            <div
               key={id}
-              className="flex justify-center items-center mr-2 px-4 py-1 bg-blue-500 text-white rounded-full text-xs"
+              className="flex justify-center items-center px-4 py-2 bg-blue-500 text-white rounded-md text-xs"
             >
               {tag}
-            </span>
+            </div>
           ))}
         </div>
         <Link to={`/detail/${blog.id}`}>

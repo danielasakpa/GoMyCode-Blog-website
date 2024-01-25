@@ -14,8 +14,9 @@ import {
   doc,
   updateDoc,
   serverTimestamp,
-} from "../firebase-config";
+} from "../util/firebase-config";
 import { useAuth } from "../context/AuthContext"; // Adjust the path accordingly
+import Loader from "../components/Loader";
 
 function CreateBlog() {
   const navigate = useNavigate();
@@ -29,6 +30,9 @@ function CreateBlog() {
     customTagsInput: "",
     description: "",
   });
+  const [Loading, setLoading] = useState(false);
+  const [imageError, setImageError] = useState("");
+  const [formError, setFormError] = useState("");
 
   const recommendedTags = [
     "React",
@@ -65,16 +69,42 @@ function CreateBlog() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
 
-    setFormData({ ...formData, blogImage: file });
-  };
+    // Check if the selected file is an image
+    if (file && file.type.startsWith("image/")) {
+      const img = new Image();
 
+      img.onload = () => {
+        if (img.height >= 583 && img.height <= 710) {
+          setFormData({ ...formData, blogImage: file });
+          setImageError("");
+        } else {
+          setImageError("Image height must be between 583px and 710px.");
+        }
+      };
+
+      img.src = URL.createObjectURL(file);
+    } else {
+      setImageError("Please select a valid image file.");
+    }
+  };
   useEffect(() => {
     Prism.highlightAll();
   }, []);
 
   const handleSaveBlog = async () => {
+    if (
+      !formData.topic ||
+      !formData.subTopic ||
+      !formData.blogImage ||
+      !formData.description
+    ) {
+      setFormError("Please fill in all required fields.");
+      return;
+    }
+
     try {
-      // Save blog data to Firestore
+      setLoading(true);
+
       const docRef = await addDoc(collection(db, "blogs"), {
         topic: formData.topic,
         subTopic: formData.subTopic,
@@ -93,7 +123,6 @@ function CreateBlog() {
             getDownloadURL(snapshot.ref)
               .then(async (url) => {
                 // Update the blog document with the image URL
-                console.log(url);
                 await updateDoc(doc(db, "blogs", docRef.id), {
                   blogImage: url,
                 });
@@ -107,12 +136,16 @@ function CreateBlog() {
           });
       }
 
-      console.log("Blog saved successfully!");
+      setLoading(false);
       navigate("/");
     } catch (error) {
       console.error("Error saving blog:", error);
     }
   };
+
+  if (Loading) {
+    return <Loader />;
+  }
 
   return (
     <div className="max-w-2xl mx-auto my-8 p-8 bg-white rounded-lg shadow-md">
@@ -173,6 +206,9 @@ function CreateBlog() {
             onChange={handleImageChange}
           />
         </div>
+        {imageError && (
+          <p className="text-red-500 text-sm mt-2">{imageError}</p>
+        )}
       </div>
 
       {/* Tags Input */}
@@ -237,6 +273,7 @@ function CreateBlog() {
           Save Blog
         </button>
       </div>
+      {formError && <p className="text-red-500 text-sm mt-2">{formError}</p>}
     </div>
   );
 }

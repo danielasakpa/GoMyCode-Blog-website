@@ -11,11 +11,10 @@ function Editor({ formData, setFormData }) {
   return (
     <>
       <ED
-        tinymceScriptSrc={process.env.PUBLIC_URL + "/tinymce/tinymce.min.js"}
         apiKey={process.env.REACT_APP_TINY_MCE_API_KEY}
         onInit={(evt, editor) => (editorRef.current = editor)}
         init={{
-          height: 500,
+          height: 400,
           menubar: false,
           plugins: [
             "advlist",

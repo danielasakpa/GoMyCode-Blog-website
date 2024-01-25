@@ -7,18 +7,22 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [userLoading, setUserLoading] = useState(true);
 
+    const auth = getAuth();
+
     useEffect(() => {
-        const auth = getAuth();
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            setUser(user);
+        const unsubscribe = onAuthStateChanged(auth, (authUser) => {
+            if (authUser) {
+                setUser(authUser);
+            } else {
+                setUser(null);
+            }
             setUserLoading(false);
         });
 
-        // Cleanup function to unsubscribe the observer
         return () => unsubscribe();
     }, []);
 
-    const value = { user, userLoading };
+    const value = { user, setUser, userLoading };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

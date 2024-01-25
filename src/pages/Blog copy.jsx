@@ -2,7 +2,6 @@ import React from "react";
 import BlogImg from "../assets/img/demo/intro.jpg";
 import ProfileIMmg from "../assets/img/demo/avatar2.jpg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import ReadNext from "../components/ReadNext";
 
 export default function Blog() {
   return (

@@ -1,15 +1,16 @@
 import React from "react";
 import { Outlet, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext"; // Adjust the path accordingly
+import Loader from "../components/Loader";
 
 const PrivateRoute = () => {
-  const { user, loading } = useAuth();
+  const { user, userLoading } = useAuth();
 
-  if (loading) {
-    return <p>Loading...</p>; // You can show a loading indicator while checking authentication state
+  if (userLoading) {
+    return <Loader />;
   }
 
-  return user ? <Outlet /> : <Navigate to="/signin" />
+  return user ? <Outlet /> : <Navigate to="/signin" />;
 };
 
 export default PrivateRoute;
