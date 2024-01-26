@@ -109,11 +109,11 @@ function Profile() {
                 console.log("User was updated successfully");
               })
               .catch((error) => {
-                console.log(error.message);
+                console.error(error.message);
               });
           })
           .catch((error) => {
-            console.log(error.message);
+            console.error(error.message);
           });
       }
     } catch (error) {
@@ -137,8 +137,6 @@ function Profile() {
   if (loading) {
     return <Loader />;
   }
-
-  console.log(user);
 
   return (
     <>

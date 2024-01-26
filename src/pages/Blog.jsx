@@ -54,14 +54,10 @@ export default function Blog() {
       setLoadingUserBlog(true);
 
       if (blog && blog.userId) {
-        console.log(" blog.userId", blog.userId);
         const usersCollectionRef = collection(db, "users");
         const q = query(usersCollectionRef, where("id", "==", blog.userId));
         const querySnapshot = await getDocs(q);
 
-        console.log(
-          querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
-        );
         setBlogUser(
           querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
         );

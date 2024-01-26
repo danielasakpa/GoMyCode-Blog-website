@@ -128,11 +128,11 @@ function CreateBlog() {
                 });
               })
               .catch((error) => {
-                console.log(error.message);
+                console.error(error.message);
               });
           })
           .catch((error) => {
-            console.log(error.message);
+            console.error(error.message);
           });
       }
 
