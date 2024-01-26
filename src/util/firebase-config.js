@@ -12,13 +12,13 @@ import {
 
 
 const firebaseConfig = {
-    apiKey: process.env.FIREBASE_API_KEY,
-    authDomain: "blog-website-7bac4.firebaseapp.com",
-    projectId: "blog-website-7bac4",
-    storageBucket: "blog-website-7bac4.appspot.com",
-    messagingSenderId: "877705099874",
-    appId: "1:877705099874:web:49f558fa375fc9174faf3b",
-    measurementId: "G-ZY5R7V1JZ5"
+    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+    authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.REACT_APP_FIREBASE_APP_ID,
+    measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
 };
 
 

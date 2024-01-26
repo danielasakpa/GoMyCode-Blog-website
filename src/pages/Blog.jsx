@@ -11,9 +11,9 @@ import {
   collection,
   query,
 } from "firebase/firestore";
-import { auth, db } from "../util/firebase-config";
+import { db } from "../util/firebase-config";
 import parse from "html-react-parser";
-import Loader from "../components/Loader";
+import BlogSkeleton from "../components/BlogSkeleton";
 
 export default function Blog() {
   const { id } = useParams();
@@ -22,6 +22,7 @@ export default function Blog() {
   const [blogs, setBlogs] = useState([]);
   const [blogUser, setBlogUser] = useState({});
   const [loading, setLoading] = useState(false);
+  const [loadingUserBlog, setLoadingUserBlog] = useState(false);
 
   useEffect(() => {
     const getData = async () => {
@@ -38,31 +39,43 @@ export default function Blog() {
       setBlogs(
         querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
       );
+      setLoading(false);
     };
 
     getData();
+    return () => {
+      setBlog({});
+      setBlogs([]);
+    };
   }, [id]);
 
   useEffect(() => {
     const getUserData = async () => {
+      setLoadingUserBlog(true);
+
       if (blog && blog.userId) {
         console.log(" blog.userId", blog.userId);
         const usersCollectionRef = collection(db, "users");
         const q = query(usersCollectionRef, where("id", "==", blog.userId));
         const querySnapshot = await getDocs(q);
 
+        console.log(
+          querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+        );
         setBlogUser(
           querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
         );
       }
-      setLoading(false);
+
+      setLoadingUserBlog(false);
     };
 
-    return () => getUserData();
+    getUserData();
+    return () => setBlogUser([]);
   }, [blog]);
 
   if (loading || !blog || !blogs || !blogUser) {
-    return <Loader />;
+    return <BlogSkeleton />;
   }
 
   const formattedDate = blog?.createdAt?.toDate().toDateString();
@@ -100,11 +113,15 @@ export default function Blog() {
           </div>
         </div>
         <div className="basis-1/2">
-          <img
-            src={blog?.blogImage}
-            alt="BlogImg"
-            className="w-[542px] max-h-[583px]"
-          />
+          {blog?.blogImage ? (
+            <img
+              src={blog?.blogImage}
+              alt="BlogImg"
+              className="w-[542px] max-h-[583px]"
+            />
+          ) : (
+            <div className="w-[542px] h-[583px] rounded animate-pulse  bg-gray-300" />
+          )}
         </div>
       </section>
       <section className="flex py-[48px] px-[15px]">
@@ -128,7 +145,7 @@ export default function Blog() {
           <div class="h-full"></div>
         </div>
         <div className="basis-3/4">
-          <div className="w-[730px] font-[Georgia] text-[20px] leading-[36px]">
+          <div className="w-[730px] font-[Georgia] text-[20px] leading-[36px] blog-post">
             {renderedDescription}
           </div>
           <div className="flex items-center p-14 my-4 bg-[#E8F3EC]">
@@ -159,7 +176,11 @@ export default function Blog() {
         <h2 className="font-Source text-[20px] font-[700] leading-[1.2] underline underline-[700] underline-offset-[20px] mb-[64px]">
           Read Next
         </h2>
-        <BlogCards blogs={blogs} currentBlog={id} />
+        <BlogCards
+          blogs={blogs}
+          currentBlog={id}
+          loadingUserBlog={loadingUserBlog}
+        />
       </section>
     </>
   );

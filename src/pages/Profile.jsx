@@ -51,6 +51,7 @@ function Profile() {
       setLoadingUserBlog(false);
     };
     getBlogsByUser();
+    return () => setBlogs([]);
   }, [user]);
 
   function onLogout() {

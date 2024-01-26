@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import BlogCard from "./BlogCard";
+import BlogCardSkeleton from "./BlogCardSkeleton";
 
 function BlogCards({ blogs, currentBlog, loadingUserBlog }) {
   const [restBlogs, setRestBlogs] = useState([]);
@@ -11,6 +12,8 @@ function BlogCards({ blogs, currentBlog, loadingUserBlog }) {
     } else {
       setRestBlogs(blogs);
     }
+
+    return () => setRestBlogs([]);
   }, [blogs, currentBlog]);
 
   if (!restBlogs || !blogs) {
@@ -20,12 +23,14 @@ function BlogCards({ blogs, currentBlog, loadingUserBlog }) {
   return (
     <div>
       {loadingUserBlog ? (
-        <div className="w-full h-[200px] flex justify-center items-center">
-          <p className="text-black font-Source text-[30px]">
-            Loading User blogs
-          </p>
+        // Use the skeleton when loading
+        <div className="grid grid-cols-3 gap-4">
+          <BlogCardSkeleton />
+          <BlogCardSkeleton />
+          <BlogCardSkeleton />
         </div>
       ) : (
+        // Render blogs or a message when not loading
         <>
           {restBlogs.length <= 0 ? (
             <div className="w-full h-[200px] flex justify-center items-center">

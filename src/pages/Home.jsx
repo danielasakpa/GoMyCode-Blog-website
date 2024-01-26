@@ -20,6 +20,7 @@ function Home() {
       setLoading(false);
     };
     getData();
+    return () => setData({});
   }, []);
 
   if (loading) {
