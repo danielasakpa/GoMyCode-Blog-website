@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import BlogCards from "../components/BlogCards";
 import {
@@ -7,42 +7,63 @@ import {
   getDoc,
   getDocs,
   where,
-  orderBy,
   collection,
   query,
 } from "firebase/firestore";
 import { db } from "../util/firebase-config";
+import { useAuth } from "../context/AuthContext"; // Adjust the path accordingly
 import parse from "html-react-parser";
 import BlogSkeleton from "../components/BlogSkeleton";
+import { deleteBlog } from "../api/blog";
+import Loader from "../components/Loader";
 
 export default function Blog() {
   const { id } = useParams();
 
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
   const [blog, setBlog] = useState({});
   const [blogs, setBlogs] = useState([]);
   const [blogUser, setBlogUser] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [loadingUserBlog, setLoadingUserBlog] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadingBlogs, setLoadingBlogs] = useState(true);
+  const [deletingBlog, setdDletingBlog] = useState(false);
 
   useEffect(() => {
     const getData = async () => {
-      setLoading(true);
+      try {
+        const docRef = doc(db, "blogs", id);
+        const blogDetail = await getDoc(docRef);
+        setBlog(blogDetail.data());
 
-      const docRef = doc(db, "blogs", id);
-      const blogDetail = await getDoc(docRef);
-      setBlog(blogDetail.data());
+        const tags = blogDetail.data()?.tags || [];
+        console.log("tags", tags);
+        const blogRef = collection(db, "blogs");
+        const q = query(blogRef, where("tags", "array-contains-any", tags));
 
-      const blogRef = collection(db, "blogs");
-      const q = query(blogRef, orderBy("createdAt", "desc"));
+        const querySnapshot = await getDocs(q);
 
-      const querySnapshot = await getDocs(q);
-      setBlogs(
-        querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
-      );
-      setLoading(false);
+        setBlogs(
+          querySnapshot.docs
+            .filter((doc) => doc.id !== id)
+            .map((doc) => ({ id: doc.id, ...doc.data() }))
+        );
+
+        console.log(
+          querySnapshot.docs
+            .filter((doc) => doc.id !== id)
+            .map((doc) => ({ id: doc.id, ...doc.data() }))
+        );
+      } catch (error) {
+        console.error("Error fetching blog data:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     getData();
+
     return () => {
       setBlog({});
       setBlogs([]);
@@ -51,8 +72,6 @@ export default function Blog() {
 
   useEffect(() => {
     const getUserData = async () => {
-      setLoadingUserBlog(true);
-
       if (blog && blog.userId) {
         const usersCollectionRef = collection(db, "users");
         const q = query(usersCollectionRef, where("id", "==", blog.userId));
@@ -63,15 +82,27 @@ export default function Blog() {
         );
       }
 
-      setLoadingUserBlog(false);
+      setLoadingBlogs(false);
     };
 
     getUserData();
     return () => setBlogUser([]);
   }, [blog]);
 
+  const handleDeleteBlog = async () => {
+    setdDletingBlog(true);
+    await deleteBlog(id);
+    setdDletingBlog(false);
+
+    navigate("/");
+  };
+
   if (loading || !blog || !blogs || !blogUser) {
     return <BlogSkeleton />;
+  }
+
+  if (deletingBlog) {
+    return <Loader />;
   }
 
   const formattedDate = blog?.createdAt?.toDate().toDateString();
@@ -121,12 +152,12 @@ export default function Blog() {
         </div>
       </section>
       <section className="flex py-[48px] px-[15px]">
-        <div className="flex justify-end mr-16 basis-1/4">
+        <div className="flex flex-col justify-end mr-16 basis-1/4">
           <div className="sticky top-[80px] z-40 h-[max-content] w-[max-content] flex flex-col items-center justify-start">
             <span className="block font-Source text-[#9B9B9B] text-[16px] mb-[16px]">
               Share this
             </span>
-            <div className="flex flex-col space-y-5">
+            <div className="flex flex-col space-y-5 mb-10">
               <div className="flex items-center justify-center w-10 h-10 p-2 text-white bg-[#0166FF] rounded-full cursor-pointer">
                 <FontAwesomeIcon icon="fa-solid fa-plus" />
               </div>
@@ -137,14 +168,42 @@ export default function Blog() {
                 <FontAwesomeIcon icon="fa-brands fa-twitter" />
               </div>
             </div>
+
+            <div className="grid grid-cols-2 gap-3 flex-wrap">
+              {blog?.tags?.map((tag, id) => (
+                <div
+                  key={id}
+                  className="flex justify-center items-center px-4 py-2 bg-[#0166FF] text-white rounded-md text-xs"
+                >
+                  {tag}
+                </div>
+              ))}
+            </div>
           </div>
-          <div class="h-full"></div>
+          <div className="h-full"></div>
         </div>
-        <div className="basis-3/4">
-          <div className="w-[730px] font-[Georgia] text-[20px] leading-[36px] blog-post">
+        <div className="basis-3/4 mr-[1rem]">
+          <div className="font-[Georgia] text-[20px] leading-[36px] blog-post">
             {renderedDescription}
           </div>
-          <div className="flex items-center p-14 my-4 bg-[#E8F3EC]">
+          {blogUser[0]?.id === user?.uid && (
+            <div className="flex items-center justify-end my-4">
+              <Link
+                to={`/editblog/${id}`}
+                className="block px-12 py-1 bg-[#0166FF] border hover:border-[#0166FF] hover:text-[#0166FF] hover:bg-[#fff] text-white rounded"
+              >
+                Edit Blog
+              </Link>
+              <button
+                onClick={handleDeleteBlog}
+                className="block px-12 py-1 bg-[#D04848] border hover:border-[#D04848] hover:text-[#D04848] hover:bg-[#fff] text-white rounded"
+              >
+                Delete Blog
+              </button>
+            </div>
+          )}
+
+          <div className="flex items-center p-14 my-4 bg-[#E8F3EC] shadow-md">
             <div className="pr-8 basis-1/2">
               <p className="font-Playfair text-[20px] mb-2 font-[700]">
                 Become a member
@@ -159,7 +218,7 @@ export default function Blog() {
                 name="fName"
                 id="fName"
                 placeholder="Enter your e-mail adress"
-                class="w-full rounded-md border border-[#e0e0e0] bg-white py-2 px-6 mb-3 text-base font-medium text-[#9B9B9B] outline-none focus:border-[#03A87C]"
+                className="w-full rounded-md border border-[#e0e0e0] bg-white py-2 px-6 mb-3 text-base font-medium text-[#9B9B9B] outline-none focus:border-[#03A87C]"
               />
               <button className="w-full px-8 py-2 bg-[#03A87C] text-white rounded">
                 Subscribe
@@ -172,11 +231,7 @@ export default function Blog() {
         <h2 className="font-Source text-[20px] font-[700] leading-[1.2] underline underline-[700] underline-offset-[20px] mb-[64px]">
           Read Next
         </h2>
-        <BlogCards
-          blogs={blogs}
-          currentBlog={id}
-          loadingUserBlog={loadingUserBlog}
-        />
+        <BlogCards blogs={blogs} loadingBlogs={loadingBlogs} />
       </section>
     </>
   );

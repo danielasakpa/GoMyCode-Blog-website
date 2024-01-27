@@ -42,3 +42,17 @@ export const validateDisplayName = (setErrors, formData) => {
         setErrors((prevErrors) => ({ ...prevErrors, displayName: "" }));
     }
 };
+
+export const validateBlogForm = (setFormError, formData) => {
+    if (
+        !formData.topic ||
+        !formData.subTopic ||
+        !formData.blogImage ||
+        !formData.description
+    ) {
+        setFormError("Please fill in all required fields.");
+        throw new Error("Form validation failed");
+    }
+};
+
+export const shouldUploadImage = (formData, blog) => formData.blogImage !== blog.blogImage;

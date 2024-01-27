@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import BlogCard from "./BlogCard";
 import BlogCardSkeleton from "./BlogCardSkeleton";
 
-function BlogCards({ blogs, currentBlog, loadingUserBlog }) {
+function BlogCards({ blogs, currentBlog, loadingBlogs, type }) {
   const [restBlogs, setRestBlogs] = useState([]);
 
   useEffect(() => {
@@ -22,7 +22,7 @@ function BlogCards({ blogs, currentBlog, loadingUserBlog }) {
 
   return (
     <div>
-      {loadingUserBlog ? (
+      {loadingBlogs ? (
         // Use the skeleton when loading
         <div className="grid grid-cols-3 gap-4">
           <BlogCardSkeleton />
@@ -35,13 +35,15 @@ function BlogCards({ blogs, currentBlog, loadingUserBlog }) {
           {restBlogs.length <= 0 ? (
             <div className="w-full h-[200px] flex justify-center items-center">
               <p className="text-black font-Source text-[30px]">
-                User don't have any blog posts found.
+                {type === "user-blog"
+                  ? "User don't have any blog posts found."
+                  : "No related blog found"}
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-4">
               {restBlogs.map((blog, id) => (
-                <BlogCard key={id} blog={blog} />
+                <BlogCard key={id} blog={blog} type={"related"} />
               ))}
             </div>
           )}

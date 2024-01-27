@@ -2,8 +2,8 @@ import Loader from "../components/Loader";
 import BlogForm from "../components/BlogForm";
 import useBlogForm from "../hooks/useBlogForm";
 
-function CreateBlog() {
-  const mode = "create";
+function BlogDetail({ blog, id }) {
+  const mode = "edit";
   const {
     formData,
     imageError,
@@ -15,7 +15,7 @@ function CreateBlog() {
     handleAddCustomTag,
     handleDeleteTag,
     handleImageChange,
-    handleCreateBlog,
+    handleUpdateBlog,
   } = useBlogForm(
     {
       topic: "",
@@ -25,7 +25,9 @@ function CreateBlog() {
       customTagsInput: "",
       description: "",
     },
-    mode
+    mode,
+    blog,
+    id
   );
 
   if (formLoading) {
@@ -43,9 +45,9 @@ function CreateBlog() {
       handleAddCustomTag={handleAddCustomTag}
       handleDeleteTag={handleDeleteTag}
       handleImageChange={handleImageChange}
-      handleSaveBlog={handleCreateBlog}
+      handleSaveBlog={handleUpdateBlog}
     />
   );
 }
 
-export default CreateBlog;
+export default BlogDetail;

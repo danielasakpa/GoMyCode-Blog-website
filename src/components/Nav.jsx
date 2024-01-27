@@ -9,27 +9,27 @@ function Nav() {
       name: "Intro",
     },
     {
-      path: "/culture",
+      path: "/",
       name: "Culture",
     },
     {
-      path: "/tech",
+      path: "/",
       name: "Tech",
     },
     {
-      path: "/politics",
+      path: "/",
       name: "Politics",
     },
     {
-      path: "/health",
+      path: "/",
       name: "Health",
     },
     {
-      path: "/collections",
+      path: "/",
       name: "Collections",
     },
     {
-      path: "/about",
+      path: "/",
       name: "About",
     },
   ];

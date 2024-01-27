@@ -15,7 +15,7 @@ function SignIn() {
   if (loading) {
     return <Loader />;
   }
-  
+
   if (user) {
     navigate("/");
   }

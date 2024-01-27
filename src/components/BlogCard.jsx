@@ -17,7 +17,7 @@ function BlogCard({ blog }) {
         className="w-full h-48 object-cover object-center"
       />
       <div className="py-6 px-2">
-        <div className="flex space-x-2 flex-wrap mb-4">
+        <div className="flex flex-wrap gap-3 flex-wrap mb-4">
           {blog.tags.slice(0, 3).map((tag, id) => (
             <div
               key={id}

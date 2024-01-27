@@ -1,0 +1,75 @@
+MERN Stack Full Form
+
+MERN Stack is a compilation of four different technologies that work together to develop dynamic web apps and websites. 
+
+It is a contraction for four different technologies as mentioned below:
+
+M - MongoDB
+E - ExpressJS
+R - ReactJS
+N - NodeJS
+
+Considering you’ve downloaded and configured all the four aforementioned technologies, you need to know how to create a new project folder to get started with the MERN stack. Next, you need to open the folder on the CMD (or terminal) and enter the following command to initialize a package.json file:
+
+npm init
+
+A standard JSON package looks as shown below:
+
+You can install modules by using:
+
+npm install module_name -save
+
+MERN Stack Components
+
+There are four components of the MERN stack. Let’s discuss each of them one by one. 
+
+The first component is MongoDB, which is a NoSQL database management system. 
+The second MERN stack component is ExpressJS. It is a backend web application framework for NodeJS.
+The third component is ReactJS, a JavaScript library for developing UIs based on UI components. 
+The final component of the MERN stack is NodeJS. It is a JS runtime environment, i.e., it enables running JavaScript code outside the browser
+
+Let’s learn more about these MERN Stack components:
+
+
+
+MongoDB
+
+
+
+MongoDB is a NoSQL DBMS where data is stored in the form of documents having key-value pairs similar to JSON objects. MongoDB enables users to create databases, schemas, and tables. It offers the Mongo shell that provides a JS interface for deleting, querying, and updating the records.
+
+
+
+ExpressJS
+
+
+
+ExpressJS is a NodeJS framework that simplifies writing the backend code. It saves you from creating multiple Node modules. For keeping the code precise, ExpressJS offers a range of middleware.
+
+
+
+ReactJS
+
+
+
+ReactJS is a JS library that allows the development of user interfaces for mobile apps and SPAs. It allows you to code JavaScript and develop UI components. The JS library uses virtual DOM for doing everything.
+
+
+
+NodeJS
+
+
+
+NodeJS is an open-source JavaScript runtime environment that allows users to run code on the server. It comes with the node package manager or npm, enabling users to select from a wide selection of node modules or packages. Being developed on the Chrome JavaScript Engine enables Node to execute code faster.
+
+Why Should You Work With MERN Stack?
+
+There are many good reasons to use the MERN Stack. For example, it allows the creation of a 3-tier architecture that includes frontend, backend, and database using JavaScript and JSON.
+
+MongoDB, which is the base of the MERN stack, is designed to store JSON data natively. Everything in it, including CLI and query language, is built using JSON and JS. The NoSQL database management system works well with NodeJS and thus, allows manipulating, representing, and storing JSON data at every tier of the application.
+
+It comes in a variant called MongoDB Atlas that further eases database management by offering an auto-scaling MongoDB cluster on any cloud provider and with just a few clicks.
+
+Express is a server-side framework that wraps HTTP requests and responses and makes mapping URLs to server-side functions easy. This perfectly complements the ReactJS framework, a front-end JS framework for developing interactive UIs in HTML while communicating with the server.
+
+As the two technologies work with JSON, data flows seamlessly, making it possible to develop fast and debug easily. To make sense of the entire system, you need to understand only one language, i.e., JavaScript and the JSON document structure.

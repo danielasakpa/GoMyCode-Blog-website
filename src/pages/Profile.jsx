@@ -29,7 +29,7 @@ function Profile() {
   const [blogs, setBlogs] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [loadingUserBlog, setLoadingUserBlog] = useState(false);
+  const [loadingBlogs, setLoadingBlogs] = useState(true);
   const [editedUser, setEditedUser] = useState({
     displayName: user.displayName || "",
     email: user.email || "",
@@ -39,7 +39,6 @@ function Profile() {
   useEffect(() => {
     const getBlogsByUser = async () => {
       if (user) {
-        setLoadingUserBlog(true);
         const blogRef = collection(db, "blogs");
         const q = query(blogRef, where("userId", "==", user.uid));
 
@@ -48,7 +47,7 @@ function Profile() {
           querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
         );
       }
-      setLoadingUserBlog(false);
+      setLoadingBlogs(false);
     };
     getBlogsByUser();
     return () => setBlogs([]);
@@ -269,7 +268,11 @@ function Profile() {
         <h2 className="font-Source text-[20px] font-[700] leading-[1.2] underline underline-[700] underline-offset-[20px] mb-[64px]">
           Your Blogs
         </h2>
-        <BlogCards blogs={blogs} loadingUserBlog={loadingUserBlog} />
+        <BlogCards
+          blogs={blogs}
+          loadingBlogs={loadingBlogs}
+          type={"user-blog"}
+        />
       </section>
     </>
   );

@@ -22,7 +22,7 @@ const BlogSkeleton = () => {
             <div className="h-4 bg-gray-400 w-[60%] mb-4 animate-pulse" />
             <div className="h-4 bg-gray-400 w-[50%] mb-8 animate-pulse" />
           </div>
-          <div class="h-full"></div>
+          <div className="h-full"></div>
         </div>
         <div className="basis-3/4">
           <div className="w-[730px] h-[400px] bg-gray-300 animate-pulse" />

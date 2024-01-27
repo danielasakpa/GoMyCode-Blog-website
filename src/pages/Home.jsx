@@ -7,11 +7,10 @@ import Loader from "../components/Loader";
 
 function Home() {
   const [data, setData] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getData = async () => {
-      setLoading(true);
       const blogRef = collection(db, "blogs");
       const q = query(blogRef, orderBy("createdAt", "desc"));
 
